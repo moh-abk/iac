@@ -147,3 +147,21 @@ account_id: SUBSCRIPTION_ID to provision on
 region: Deployment region
 commands: get plan apply plan_destroy destroy show_state
 ```
+
+### Plan & Apply
+
+```shell
+export ARM_SUBSCRIPTION_ID=
+export ARM_TENANT_ID=
+export ARM_CLIENT_ID=
+export ARM_CLIENT_SECRET=
+
+./terraform.sh <SUBSCRIPTION_ID> <ENVIRONMENT> <LOCATION> 01-network plan
+./terraform.sh <SUBSCRIPTION_ID> <ENVIRONMENT> <LOCATION> 01-network apply
+
+./terraform.sh <SUBSCRIPTION_ID> <ENVIRONMENT> <LOCATION> 02-database plan
+./terraform.sh <SUBSCRIPTION_ID> <ENVIRONMENT> <LOCATION> 02-database apply
+
+./terraform.sh <SUBSCRIPTION_ID> <ENVIRONMENT> <LOCATION> 03-compute plan -var vmss_source_image_id="" # passed inline once Packer build is complete.
+./terraform.sh <SUBSCRIPTION_ID> <ENVIRONMENT> <LOCATION> 03-compute apply
+```
