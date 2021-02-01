@@ -33,6 +33,7 @@ jobs:
 
   terraform:
     name: 'Terraform'
+    needs: packer
     runs-on: ubuntu-latest
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
@@ -54,9 +55,24 @@ jobs:
     # Terraform
     - name: Stack - Network
       run: cd terraform/infrastructure/azure && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 01-network plan && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 01-network apply
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
 
     - name: Stack - Database
       run: cd terraform/infrastructure/azure && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 02-database plan && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 02-database apply
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
 
     - name: Stack - Compute
       run: cd terraform/infrastructure/azure && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 03-compute plan -var vmss_source_image_id="/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/genesis_resource_group/providers/Microsoft.Compute/images/WindowsServer2019-IIS-Packer-$(git rev-parse --short=5 HEAD)" && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 03-compute apply
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
