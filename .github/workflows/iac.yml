@@ -7,6 +7,30 @@ on:
   pull_request:
 
 jobs:
+  packer:
+    name: 'Packer'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install the latest version of Packer CLI
+    - name: Setup Packer
+      uses: hashicorp-contrib/setup-packer@v1.0.0
+      with:
+        packer-version: 1.6.6
+
+    # Packer build
+    - name: Build Golden Image - Packer
+      run: cd packer && packer build -var image-identifier=$(git rev-parse --short=5 HEAD) -var azure-subscription-id=${{ secrets.ARM_SUBSCRIPTION_ID }} -var azure-client-id=${{ secrets.ARM_CLIENT_ID }}  -var azure-client-secret=${{ secrets.ARM_CLIENT_SECRET }} -var azure-tenant-id=${{ secrets.ARM_TENANT_ID }} -var-file=windows-variables.json windows-2019-iis.json
+
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
@@ -26,13 +50,13 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 0.14.4
-    
-    # Install the latest version of Packer CLI
-    - name: Setup Packer
-      uses: hashicorp-contrib/setup-packer@v1.0.0
-      with:
-        packer-version: 1.6.6
 
-    # Packer build
-    - name: Build Golden Image - Packer
-      run: cd packer && packer build -var image-identifier=$(git rev-parse --short=5 HEAD) -var azure-subscription-id=${{ secrets.ARM_SUBSCRIPTION_ID }} -var azure-client-id=${{ secrets.ARM_CLIENT_ID }}  -var azure-client-secret=${{ secrets.ARM_CLIENT_SECRET }} -var azure-tenant-id=${{ secrets.ARM_TENANT_ID }} -var-file=windows-variables.json windows-2019-iis.json
+    # Terraform
+    - name: Stack - Network
+      run: cd terraform/infrastructure/azure && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 01-network plan && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 01-network apply
+
+    - name: Stack - Database
+      run: cd terraform/infrastructure/azure && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 02-database plan && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 02-database apply
+
+    - name: Stack - Compute
+      run: cd terraform/infrastructure/azure && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 03-compute plan -var vmss_source_image_id="/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/genesis_resource_group/providers/Microsoft.Compute/images/WindowsServer2019-IIS-Packer-$(git rev-parse --short=5 HEAD)" && ./terraform.sh ${{ secrets.ARM_SUBSCRIPTION_ID }} dev "UK South" 03-compute apply
