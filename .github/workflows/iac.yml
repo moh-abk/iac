@@ -35,4 +35,4 @@ jobs:
 
     # Packer build
     - name: Build Golden Image - Packer
-      run: packer build -var image-identifier=$(git rev-parse --short=5 HEAD) -var azure-subscription-id=${{ secrets.ARM_SUBSCRIPTION_ID }} -var azure-client-id=${{ secrets.ARM_CLIENT_ID }}  -var azure-client-secret=${{ secrets.ARM_CLIENT_SECRET }} -var azure-tenant-id=${{ secrets.ARM_TENANT_ID }} -var-file=windows-variables.json windows-2019-iis.json
+      run: cd packer && packer build -var image-identifier=$(git rev-parse --short=5 HEAD) -var azure-subscription-id=${{ secrets.ARM_SUBSCRIPTION_ID }} -var azure-client-id=${{ secrets.ARM_CLIENT_ID }}  -var azure-client-secret=${{ secrets.ARM_CLIENT_SECRET }} -var azure-tenant-id=${{ secrets.ARM_TENANT_ID }} -var-file=windows-variables.json windows-2019-iis.json
