@@ -1,9 +1,4 @@
 {
-  "azure-subscription-id": "",
-  "azure-client-id": "",
-  "azure-client-secret": "",
-  "azure-tenant-id": "",
-
   "azure-resource-group": "genesis_resource_group",
   "azure-region": "uksouth",
 
